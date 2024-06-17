@@ -1,0 +1,34 @@
+
+# os
+.DS_Store
+Thumbs.db
+
+# bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# build
+build/
+dist/
+*.egg-info/
+
+# ide
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# pytest
+.pytest_cache/
+
+# temp
+*.log
+*.tmp
+
+# env
+venv/
+*.env
+
+# custom
+dev/
