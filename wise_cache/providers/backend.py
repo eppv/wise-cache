@@ -12,6 +12,7 @@ class Provider(object):
         self.exporter = provider_package.Exporter
         self.url = provider_package.SERVICE_URL
         self.token = provider_package.TOKEN
+        self.article = provider_package.Article
 
 
 def load_backend(provider_name: str):

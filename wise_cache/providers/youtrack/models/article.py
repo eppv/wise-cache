@@ -114,6 +114,7 @@ class Article(TimestampMixin):
             f"updated={self.updated}, "
             f"hasChildren={self.has_children}, "
             f"hasStar={self.has_star}, "
+            f"ordinal={self.ordinal}, "
             f"tags={self.tags}, "
             f"project='{self.project.name}', "
             f"reporter='{self.reporter.name}', "

@@ -49,6 +49,7 @@ class Extractor:
                   '$top': top
                   }
 
+        print(f'Getting articles page from {skip} to {top}')
         response = requests.get(url, headers=headers, params=params)
 
         data = remove_key_recursive(response.json(), '$type')
@@ -79,18 +80,11 @@ class Exporter:
         if not os.path.isdir(export_path):
             create_dir(f'{export_path}/')
 
-        normal_article_title = remove_invalid_windows_chars_and_emojis(article.summary)
-
-        filename = f'{normal_article_title}.md'
-        filepath = f'{self.root}/{filename}'
-
         meta = f"""
-        
 
 ```yaml
 id: {article.id_readable}
 project: {article.project.name}
-title: {article.summary}
 authors: [{article.reporter.name}, {article.updated_by.name}]
 created: {article.created}
 updated: {article.updated}
@@ -101,15 +95,24 @@ child_articles: {article.child_articles}
 
         tags = ' '.join(f'#{tag}' for tag in article.tags)
 
-        basic_text = article.content
+        basic_text = article.content if article.content else ''
 
         if include_extras:
-            basic_text = meta + tags + basic_text
+            basic_text = article.summary + meta + tags + basic_text
+
+        # normal_article_title = remove_invalid_windows_chars_and_emojis(
+        #     article.summary)
+        normal_article_title = article.summary
+        filename = f'{normal_article_title}.md'
+        filepath = f'{self.root}/{filename}'
 
         if article.has_children:
             parent_dir = f'{self.root}/{normal_article_title}'
+            setattr(article, 'parent_dir', parent_dir)
             create_dir(parent_dir)
             filepath = f'{parent_dir}/{filename}'
 
         save_md_file(path=filepath, content=basic_text)
+
         return True
+
