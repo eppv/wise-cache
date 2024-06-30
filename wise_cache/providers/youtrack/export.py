@@ -1,28 +1,44 @@
 import os
 import requests
-from typing import Optional, List
+from typing import Optional, List, Union
 from dotenv import load_dotenv
 
+from wise_cache.core.export import save_md_file
 from wise_cache.core.utils import remove_key_recursive, create_dir
 from wise_cache.core.formats import remove_invalid_windows_chars_and_emojis
-
 from wise_cache.providers.youtrack.models.article import Article
 
 load_dotenv()
 YOUTRACK_SERVICE_URL = os.getenv('YOUTRACK_SERVICE_URL')
-
-
-def save_md_file(path: str, content: str):
-    try:
-        with open(path, 'w', encoding='utf-8') as file:
-            file.write(content)
-        print(f"File '{path}' has been saved successfully.")
-    except Exception as e:
-        print(f"An error occurred while saving the file: {e}")
+YOUTRACK_ISSUE_FIELDS = (
+        'id',
+        'attachments',
+        'childArticles(idReadable)',
+        'comments(id)',
+        'content',
+        'created',
+        'externalArticle',
+        'hasChildren',
+        'hasStar',
+        'idReadable',
+        'ordinal',
+        'parentArticle(name)',
+        'pinnedComments',
+        'project(name,shortName)',
+        'reporter(name,email)',
+        'summary',
+        'tags(name)',
+        'updated',
+        'updatedBy(name,email)',
+        'visibility'
+)
 
 
 class Extractor:
-    def __init__(self, url: Optional[str] = None, fields: Optional[List[str]] = None):
+    def __init__(
+            self,
+            url: Optional[str] = None,
+            fields: Union[list[str], tuple[str]] = YOUTRACK_ISSUE_FIELDS):
         self.url = url if not YOUTRACK_SERVICE_URL else YOUTRACK_SERVICE_URL
         self.fields = fields
 
@@ -72,7 +88,8 @@ class Exporter:
 
     def export_article(self, article: Article,
                        include_extras: bool = False,
-                       export_path: str = None):
+                       export_path: str = None,
+                       remove_emojis_from_summary = False):
 
         if not export_path:
             export_path = self.root
@@ -100,9 +117,12 @@ child_articles: {article.child_articles}
         if include_extras:
             basic_text = article.summary + meta + tags + basic_text
 
-        # normal_article_title = remove_invalid_windows_chars_and_emojis(
-        #     article.summary)
-        normal_article_title = article.summary
+        if remove_emojis_from_summary:
+            normal_article_title = remove_invalid_windows_chars_and_emojis(
+                article.summary)
+        else:
+            normal_article_title = article.summary
+
         filename = f'{normal_article_title}.md'
         filepath = f'{self.root}/{filename}'
 

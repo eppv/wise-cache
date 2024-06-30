@@ -1,5 +1,6 @@
 import os
 
+
 def remove_key_recursive(data, key_to_remove='$type'):
     if isinstance(data, dict):
         # Create a new dictionary without the key to remove
