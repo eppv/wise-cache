@@ -1,3 +1,4 @@
+import re
 from typing import List, Optional
 from .user import User
 from .project import Project
@@ -121,6 +122,22 @@ class Article(TimestampMixin):
             f"updatedBy='{self.updated_by.name}', "
             f"visibility='{self.visibility}')"
         )
+
+    def extract_native_links(self):
+        text = self.content
+        link_pattern = re.compile(
+            r'\[([^\]]+)\]\((https?://[^/]*myjetbrains\.com/youtrack/articles/[^\)]+)\)')
+        id_pattern = r'\b[A-Z]+-[A-Z]-\d+\b'
+
+        link_matches = link_pattern.findall(text)
+        extracted_links = {}
+        for match in link_matches:
+            full_link = f'[{match[0]}]({match[1]})'
+            id_match = re.search(id_pattern, full_link)
+            id_readable = id_match.group(0)
+            extracted_links[id_readable] = full_link
+
+        return extracted_links
 
 
 class ArticleAttachment:

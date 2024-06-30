@@ -1,11 +1,16 @@
 import os
 import requests
+import re
 from typing import Optional, List, Union
 from dotenv import load_dotenv
 
 from wise_cache.core.export import save_md_file
 from wise_cache.core.utils import remove_key_recursive, create_dir
-from wise_cache.core.formats import remove_invalid_windows_chars_and_emojis
+from wise_cache.core.formats import (
+    remove_invalid_windows_chars_and_emojis,
+    get_code_block_meta,
+    get_obsidian_style_meta
+)
 from wise_cache.providers.youtrack.models.article import Article
 
 load_dotenv()
@@ -88,8 +93,9 @@ class Exporter:
 
     def export_article(self, article: Article,
                        include_extras: bool = False,
+                       obsidian_style_meta: bool = False,
                        export_path: str = None,
-                       remove_emojis_from_summary = False):
+                       remove_emojis_from_summary=False):
 
         if not export_path:
             export_path = self.root
@@ -97,25 +103,18 @@ class Exporter:
         if not os.path.isdir(export_path):
             create_dir(f'{export_path}/')
 
-        meta = f"""
-
-```yaml
-id: {article.id_readable}
-project: {article.project.name}
-authors: [{article.reporter.name}, {article.updated_by.name}]
-created: {article.created}
-updated: {article.updated}
-child_articles: {article.child_articles}
-```
-
-"""
+        meta = get_obsidian_style_meta(article) if obsidian_style_meta else get_code_block_meta(article)
 
         tags = ' '.join(f'#{tag}' for tag in article.tags)
 
         basic_text = article.content if article.content else ''
 
         if include_extras:
-            basic_text = article.summary + meta + tags + basic_text
+            basic_text = (
+                    meta
+                    + tags
+                    + basic_text
+            )
 
         if remove_emojis_from_summary:
             normal_article_title = remove_invalid_windows_chars_and_emojis(

@@ -39,17 +39,42 @@ def remove_invalid_windows_chars_and_emojis(text):
     return text.strip()
 
 
+def get_code_block_meta(article):
+
+    meta = f"""
+```yaml
+id: {article.id_readable}
+project: {article.project.name}
+authors: [{article.reporter.name}, {article.updated_by.name}]
+created: {article.created}
+updated: {article.updated}
+child_articles: {article.child_articles}
+```
+"""
+    return meta
+
+
+def get_obsidian_style_meta(article):
+    meta = f"""---
+id: {article.id_readable}
+project: {article.project.name}
+authors: [{article.reporter.name}, {article.updated_by.name}]
+created: {article.created}
+updated: {article.updated}
+child_articles: {article.child_articles}
+---
+"""
+    return meta
+
+
+def replace_exact_links(text, original, replacement):
+    pattern = re.escape(original)
+    new_text = re.sub(pattern, replacement, text)
+    return new_text
+
+
+
+
 if __name__ == '__main__':
 
-    example_ts = 1679406361592
-
-    example_ddtm = convert_timestamp_to_datetime(example_ts)
-    print(example_ddtm)
-
-    unacceptable_string = 'Python 🐍'
-
-    acceptable_string = remove_invalid_windows_chars_and_emojis(
-        unacceptable_string)
-
-    print(unacceptable_string)
-    print(acceptable_string+'.md')
+    link_str = '[Knowledge Management](https://evgeniypalych.myjetbrains.com/youtrack/articles/BSNS-A-103/Knowledge-Management)'

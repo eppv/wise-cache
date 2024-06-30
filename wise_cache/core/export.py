@@ -1,4 +1,7 @@
 
+from wise_cache.core.formats import replace_exact_links
+
+
 def get_all_articles(provider, page_size: int = 50):
     skip = 0
     top = page_size
@@ -24,17 +27,42 @@ def get_all_articles(provider, page_size: int = 50):
     return articles_dict
 
 
+def obsidize_links(articles: dict, article):
+    if article.content is None or article.content == "":
+        return
+    native_links = article.extract_native_links()
+    for id_readable, link in native_links.items():
+        try:
+            obsidian_style_link = f'[[{articles[id_readable].summary}]]'
+        except KeyError:
+            obsidian_style_link = f'[[{link.split('/')[-1][:-1]}]]'
+        print(f'"{link}" converted to ""{obsidian_style_link}"')
+        modified_content = replace_exact_links(article.content, link, obsidian_style_link)
+        setattr(article, 'content', modified_content)
+
+
 def export_article_with_children(
         provider,
         articles: dict,
         article_id: str,
-        export_path: str = None):
+        export_path: str = None,
+        obsidian_style: bool = False,
+):
 
     article_to_export = articles[article_id]
     exporter = provider.exporter(export_path)
     print(f'Saving {article_to_export.id_readable} '
           f'to {exporter.root}/{article_to_export.summary}')
-    exporter.export_article(article_to_export, export_path)
+
+    if obsidian_style:
+        print('Converting format to obsidian-style:')
+        obsidize_links(articles, article_to_export)
+
+    exporter.export_article(
+        article_to_export,
+        export_path,
+        obsidian_style_meta=obsidian_style
+    )
     if article_to_export.has_children:
         print(f'Parent dir: {article_to_export.parent_dir}')
         for child in article_to_export.child_articles:
@@ -46,7 +74,9 @@ def export_article_with_children(
                 provider,
                 articles,
                 child_to_export.id_readable,
-                export_path=child_export_path)
+                export_path=child_export_path,
+                obsidian_style=True
+            )
 
 
 def save_md_file(path: str, content: str):
