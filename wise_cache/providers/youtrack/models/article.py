@@ -128,14 +128,20 @@ class Article(TimestampMixin):
         link_pattern = re.compile(
             r'\[([^\]]+)\]\((https?://[^/]*myjetbrains\.com/youtrack/articles/[^\)]+)\)')
         id_pattern = r'\b[A-Z]+-[A-Z]-\d+\b'
+        alias_pattern = re.compile(r'\[([^\]]+)\]')
 
         link_matches = link_pattern.findall(text)
         extracted_links = {}
         for match in link_matches:
             full_link = f'[{match[0]}]({match[1]})'
             id_match = re.search(id_pattern, full_link)
+            alias_match = re.search(alias_pattern, full_link)
             id_readable = id_match.group(0)
-            extracted_links[id_readable] = full_link
+            alias = alias_match.group(1)
+            extracted_links[id_readable] = {
+                'link': full_link,
+                'alias': alias
+            }
 
         return extracted_links
 

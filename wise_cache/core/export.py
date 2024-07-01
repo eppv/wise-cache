@@ -31,11 +31,14 @@ def obsidize_links(articles: dict, article):
     if article.content is None or article.content == "":
         return
     native_links = article.extract_native_links()
-    for id_readable, link in native_links.items():
+    for id_readable, link_parts in native_links.items():
+        link = link_parts['link']
+        alias = link_parts['alias']
         try:
-            obsidian_style_link = f'[[{articles[id_readable].summary}]]'
+            summary = articles[id_readable].summary
+            obsidian_style_link = f'[[{summary}]]' if summary == alias else f'[[{summary}|{alias}]]'
         except KeyError:
-            obsidian_style_link = f'[[{link.split('/')[-1][:-1]}]]'
+            obsidian_style_link = f'[[{link.split('/')[-1][:-1]}|{alias}]]'
         print(f'"{link}" converted to ""{obsidian_style_link}"')
         modified_content = replace_exact_links(article.content, link, obsidian_style_link)
         setattr(article, 'content', modified_content)
