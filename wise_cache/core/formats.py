@@ -55,6 +55,7 @@ child_articles: {article.child_articles}
 
 
 def get_obsidian_style_meta(article):
+    article.tags.append('inbox')
     meta = f"""---
 id: {article.id_readable}
 project: {article.project.name}
@@ -62,6 +63,7 @@ authors: [{article.reporter.name}, {article.updated_by.name}]
 created: {article.created}
 updated: {article.updated}
 child_articles: {article.child_articles}
+tags: {article.tags}
 ---
 """
     return meta

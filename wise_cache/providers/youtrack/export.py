@@ -93,6 +93,7 @@ class Exporter:
 
     def export_article(self, article: Article,
                        include_extras: bool = False,
+                       include_tags: bool = False,
                        obsidian_style_meta: bool = False,
                        export_path: str = None,
                        remove_emojis_from_summary=False):
@@ -109,10 +110,12 @@ class Exporter:
 
         basic_text = article.content if article.content else ''
 
+        if include_tags:
+            meta += f'\ntags: {tags}'
+
         if include_extras:
             basic_text = (
                     meta
-                    + tags
                     + basic_text
             )
 

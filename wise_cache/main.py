@@ -33,6 +33,8 @@ if __name__ == '__main__':
 
     example_article = all_articles[upper_level_article_ids[0]]
 
+    print(example_article)
+
     for upper_level_article_id in upper_level_article_ids:
         export_article_with_children(
             provider=provider,
