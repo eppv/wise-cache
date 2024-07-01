@@ -18,7 +18,7 @@ YOUTRACK_SERVICE_URL = os.getenv('YOUTRACK_SERVICE_URL')
 YOUTRACK_ISSUE_FIELDS = (
         'id',
         'attachments',
-        'childArticles(idReadable)',
+        'childArticles(idReadable,summary)',
         'comments(id)',
         'content',
         'created',

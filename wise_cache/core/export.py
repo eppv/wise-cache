@@ -1,5 +1,5 @@
 
-from wise_cache.core.formats import replace_exact_links
+from wise_cache.core.formats import replace_exact_links, replace_invalid_filename_chars
 
 
 def get_all_articles(provider, page_size: int = 50):
@@ -22,7 +22,10 @@ def get_all_articles(provider, page_size: int = 50):
             data=current_page)
         articles.extend(current_page_articles)
 
-    articles_dict = {article.id_readable: article for article in articles}
+    articles_dict = {}
+    for article in articles:
+        setattr(article, 'summary', replace_invalid_filename_chars(filename=article.summary, replacement='.'))
+        articles_dict[article.id_readable] = article
 
     return articles_dict
 

@@ -39,6 +39,13 @@ def remove_invalid_windows_chars_and_emojis(text):
     return text.strip()
 
 
+def replace_invalid_filename_chars(filename, replacement='_'):
+    # Define a regular expression pattern to match invalid characters
+    invalid_chars_pattern = r'[\/:*?"<>|]'
+    valid_filename = re.sub(invalid_chars_pattern, replacement, filename)
+    return valid_filename
+
+
 def get_code_block_meta(article):
 
     meta = f"""
@@ -56,13 +63,19 @@ child_articles: {article.child_articles}
 
 def get_obsidian_style_meta(article):
     article.tags.append('inbox')
+    child_articles_links = [
+        f'[[{replace_invalid_filename_chars(child["summary"], '.')}]]'
+        for child in article.child_articles
+    ]
+    if len(child_articles_links) >= 5:
+        article.tags.append('moc')
     meta = f"""---
 id: {article.id_readable}
 project: {article.project.name}
 authors: [{article.reporter.name}, {article.updated_by.name}]
 created: {article.created}
 updated: {article.updated}
-child_articles: {article.child_articles}
+child_articles: {child_articles_links}
 tags: {article.tags}
 ---
 """
